@@ -23,7 +23,7 @@ ToMeta <- function(genes, data=NULL, to = "mergedname"){
   if (tmp > 0){
     ind <- match(genes, data$name)
     if (!(to %in% colnames(data))) stop("parameter 'to' needs to be one of the columns in data")
-    metanames <- data[ind[!is.na(ind)],to]
+    metanames <- as.vector(data[ind[!is.na(ind)],to]) # make it not factor class
     genesinmeta <- genes[!is.na(ind)]
     genes[!is.na(ind)] <- metanames
     message(paste0(paste(genesinmeta, collapse = " ")," is/are in metagenes"))
