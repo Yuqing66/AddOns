@@ -9,7 +9,7 @@
 #' @param grey Add cells belong to other panels as grey at the back, if TRUE.
 #' @examples
 #' DimPlot.patient(srt, group.by = "Patient", split.by = "Disease")
-#' @import patchwork wrap_plots
+#' @importFrom patchwork wrap_plots
 #' @import ggplot2
 #' @export
 
