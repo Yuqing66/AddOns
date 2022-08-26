@@ -1,6 +1,6 @@
 #' ToMeta
-#' @description A wrapper to change a list of genes to their meta gene names if applicable. 
-#'  Return a genelist with new meta gene names and print the part of matagene table describing 
+#' @description A wrapper to change a list of genes to their meta gene names if applicable.
+#'  Return a genelist with new meta gene names and print the part of matagene table describing
 #'  meta genes included in gene list. Can be directly used for ploting with new data
 #'  print info for meta genes included.
 #' @param genes A vector of genes.
@@ -13,9 +13,9 @@
 
 
 ToMeta <- function(genes, data=NULL, to = "mergedname"){
-  
+
   if (is.null(data)){
-    data("metagene")
+    data("metagene", envir = environment())
     data <- metagene
   }
   # are there meta genes in gene list?
