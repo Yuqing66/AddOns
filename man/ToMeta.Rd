@@ -14,8 +14,8 @@ ToMeta(genes, data = NULL, to = "mergedname")
 \item{to}{Change to meta or mergedgene name. Or use the name of a custom column.}
 }
 \description{
-A wrapper to change a list of genes to their meta gene names if applicable. 
- Return a genelist with new meta gene names and print the part of matagene table describing 
+A wrapper to change a list of genes to their meta gene names if applicable.
+ Return a genelist with new meta gene names and print the part of matagene table describing
  meta genes included in gene list. Can be directly used for ploting with new data
  print info for meta genes included.
 }

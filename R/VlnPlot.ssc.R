@@ -22,9 +22,10 @@
 #' @param text_sizes Seven elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size.
 #' @param alpha Transparency of violin plot.
 #' @param theme ggplot theme. classic by default.
-#' 
+#'
 #' @examples
 #' VlnPlot.ssc(srt, gene = "CXCL10", group.by = "Skin", split.by = c("CellType", "Disease"), spread = c("Disease", "HealthyControl"), assay = "RNA")
+#' @import ggplot2
 #' @export
 
 
@@ -33,11 +34,11 @@
 
 
 
-VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = NULL, split.order = NULL, title = "", assay = "RNA", slot = "data", log_scale = F, 
-                         colors = NULL, spread = NULL, jitter_pts = T, 
-                         plot_mean = T, size = 1, sig = 3, number_labels = T, text_sizes = c(15, 10, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic") 
+VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = NULL, split.order = NULL, title = "", assay = "RNA", slot = "data", log_scale = F,
+                         colors = NULL, spread = NULL, jitter_pts = T,
+                         plot_mean = T, size = 1, sig = 3, number_labels = T, text_sizes = c(15, 10, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic")
 {
-  
+
   df <- object@meta.data[, colnames(object@meta.data) %in% c(gene, group.by, split.by), drop = F]
   assay <- assay %||% DefaultAssay(object = object)
   DefaultAssay(object = object) <- assay
@@ -51,7 +52,7 @@ VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = 
       if (!is.null(split.order[[term]])) df[,term] <- factor(df[,term], levels = split.order[[term]])
     }
   }
-  
+
   colnames(df) <- gsub("-", "", colnames(df))
   gene <- gsub("-", "", gene)
   if (any(!is.null(spread))) {
@@ -81,32 +82,32 @@ VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = 
   else {
     g <- g + theme_classic()
   }
-  if (title == "") 
+  if (title == "")
     title <- gene
   g <- g + labs(title = title, y = gene)
-  g <- g + theme(plot.title = element_text(size = text_sizes[1]), 
-                 axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), 
+  g <- g + theme(plot.title = element_text(size = text_sizes[1]),
+                 axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]),
                  legend.title = element_text(size = text_sizes[4]), legend.text = element_text(size = text_sizes[5]))
-  g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5), 
-                 axis.title.x = element_blank(), axis.text.x = element_blank(), 
+  g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5),
+                 axis.title.x = element_blank(), axis.text.x = element_blank(),
                  axis.ticks.x = element_blank())
-  if (jitter_pts == T) 
-    g <- g + geom_jitter(aes_string(x = group.by, y = "plot", 
+  if (jitter_pts == T)
+    g <- g + geom_jitter(aes_string(x = group.by, y = "plot",
                                     col = group.by), width = 0.2, size = size)
-  g <- g + geom_violin(aes_string(x = group.by, y = "plot", 
+  g <- g + geom_violin(aes_string(x = group.by, y = "plot",
                                   fill = group.by), col = "black", trim = T, scale = "width", alpha = alpha)
   if (number_labels == T) {
-    g <- g + stat_summary(aes_string(x = group.by, y = "value"), 
+    g <- g + stat_summary(aes_string(x = group.by, y = "value"),
                           fun.data = function(x) {
                             return(c(y = -max(df$plot)/25, label = length(x)))
                           }, colour = "black", geom = "text", size = text_sizes[7])
-    g <- g + stat_summary(aes_string(x = group.by, y = "value"), 
+    g <- g + stat_summary(aes_string(x = group.by, y = "value"),
                           fun.data = function(x) {
                             return(c(y = -max(df$plot)/10, label = round(mean(as.numeric(x > 0)), sig)))
                           }, colour = "black", geom = "text", size = text_sizes[7])
   }
   if (plot_mean == TRUE) {
-    scale <- max(df$plot)/max(tapply(df$value, INDEX = as.list(df[, colnames(df) %in% c(group.by, split.by), drop = F]), 
+    scale <- max(df$plot)/max(tapply(df$value, INDEX = as.list(df[, colnames(df) %in% c(group.by, split.by), drop = F]),
                                      FUN = mean), na.rm = T)
     g <- g + suppressWarnings(stat_summary(aes_string(x = group.by, y = "value"), fun.y = function(x) mean(x) * (scale * 0.5), colour = "black", geom = "point", size = 2))
     g <- g + scale_y_continuous(sec.axis = sec_axis(~./(scale * 0.5), name = "Mean Expression"))
@@ -120,7 +121,7 @@ VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = 
   else if (length(split.by) > 2) {
     stop("Parameter split.by needs to be a string with equal or less than two variables.")
   }
-  if (!is.null(split.by)) 
+  if (!is.null(split.by))
     g <- g + theme(strip.text.x = element_text(size = text_sizes[6]))
   return(g)
 }

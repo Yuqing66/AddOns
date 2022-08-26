@@ -9,12 +9,13 @@
 #' @param grey Add cells belong to other panels as grey at the back, if TRUE.
 #' @examples
 #' DimPlot.patient(srt, group.by = "Patient", split.by = "Disease")
+#' @import patchwork wrap_plots
+#' @import ggplot2
 #' @export
 
 # This function subset data by facet argument, then treat each as an individual plot for coloring
 # Default using DimPlot.grey
 
-library(patchwork)
 DimPlot.patient <- function(object,
                             dims = c(1, 2),
                             pt.size = 0.2,
@@ -51,8 +52,8 @@ DimPlot.patient <- function(object,
     set.seed(seed = seed)
     data <- data[sample(x = 1:nrow(x = data)), ]
   }
-  
-  
+
+
   plots <- lapply(
     X = unique(data[, split.by]), # each split as a separate plot
     FUN = function(x) {
@@ -65,7 +66,7 @@ DimPlot.patient <- function(object,
     }
   )
   plots <- wrap_plots(plots, ncol = ncol)
-  
+
   return(plots)
 }
 

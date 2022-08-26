@@ -21,9 +21,9 @@ DimPlot.grey(
 \item{...}{same as Seurat DimPlot function.}
 }
 \description{
-In Seurat DimPlot function, split.by parameter allows cells to be splited into 
+In Seurat DimPlot function, split.by parameter allows cells to be splited into
 separate panels according to a meta column. However, it's sometimes hard to compare across panels because
-some clusters are not existed in some conditions, and therefore the look of embeddings in each panel can 
+some clusters are not existed in some conditions, and therefore the look of embeddings in each panel can
 look drastically different.
 
 To locate cells on the full embedding easier, this function plot cells in other panels in grey at the back,

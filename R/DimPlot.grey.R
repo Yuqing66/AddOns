@@ -1,8 +1,8 @@
 #' DimPlot with grey background in split panels
 #'
-#' @description In Seurat DimPlot function, split.by parameter allows cells to be splited into 
+#' @description In Seurat DimPlot function, split.by parameter allows cells to be splited into
 #' separate panels according to a meta column. However, it's sometimes hard to compare across panels because
-#' some clusters are not existed in some conditions, and therefore the look of embeddings in each panel can 
+#' some clusters are not existed in some conditions, and therefore the look of embeddings in each panel can
 #' look drastically different.
 #'
 #' To locate cells on the full embedding easier, this function plot cells in other panels in grey at the back,
@@ -11,6 +11,7 @@
 #' @param ... same as Seurat DimPlot function.
 #' @examples
 #' DimPlot.grey(srt, group.by = "Disease", split.by = "Disease")
+#' @import ggplot2
 #' @export
 
 
@@ -54,12 +55,12 @@ DimPlot.grey <- function(
   }
   g <- ggplot() +
     geom_point(data = data[, dims], mapping = aes(x=get(dims[1]), y=get(dims[2])), col = back.col, size = 0.1)
-  
+
   g <- g + geom_point(data = data, mapping = aes(x=get(dims[1]), y=get(dims[2]), col=get(group.by)), size = pt.size) +
     xlab(dims[1]) + ylab(dims[2]) + theme_classic() + labs(col=group.by)
   if (!is.null(split.by)){
     g <- g + facet_wrap(reformulate(split.by), ncol = ncol)
   }
-  
+
   return(g)
 }

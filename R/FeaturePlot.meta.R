@@ -2,19 +2,19 @@
 #'
 #' @description Although ToMeta can easily transform any gene to its meta name, the saved FeaturePlot can be confusing not
 #' knowing what was the gene name wanted to plot at first. This function embed ToMeta inside, and display the original gene name.
-#' 
+#'
 #' @param ... same as Seurat FeaturePlot function.
 #' @param data.ToMeta meta gene table passed to ToMeta function.
-#' @param to.ToMeta to parameter in ToMeta function.
+#' @param to.ToMeta to parameter in ToMeta function. The gene name format used in this Seurat object.
 #' @examples
 #' FeaturePlot.meta(srt, "FOXP3")
+#' @importFrom cowplot theme_cowplot
+#' @importFrom patchwork wrap_plots
+#' @importFrom Seurat AutoPointSize SetQuantile UpdateSlots DefaultDimReduc SingleDimPlot
+#' @import ggplot2
 #' @export
 
 
-
-
-library(cowplot)
-library(patchwork)
 
 FeaturePlot.meta <- function(
     object,
@@ -146,7 +146,7 @@ FeaturePlot.meta <- function(
   # Name the reductions
   dims <- paste0(Key(object = object[[reduction]]), dims)
   cells <- cells %||% colnames(x = object)
-  
+
   ###### ------ CHANGE ------ ######
   # Get plotting data
   features.meta <- ToMeta(features, data = data.ToMeta, to = to.ToMeta)
@@ -164,7 +164,7 @@ FeaturePlot.meta <- function(
   }
   colnames(data)[4:ncol(data)] <- features.selected
   ###### ------ END ------ ######
-  
+
   # Check presence of features/dimensions
   if (ncol(x = data) < 4) {
     stop(
@@ -554,266 +554,266 @@ FeaturePlot.meta <- function(
 
 
 
-
-
-SingleDimPlot <- function(
-    data,
-    dims,
-    col.by = NULL,
-    cols = NULL,
-    pt.size = NULL,
-    shape.by = NULL,
-    alpha.by = NULL,
-    order = NULL,
-    label = FALSE,
-    repel = FALSE,
-    label.size = 4,
-    cells.highlight = NULL,
-    cols.highlight = '#DE2D26',
-    sizes.highlight = 1,
-    na.value = 'grey50',
-    raster = NULL,
-    raster.dpi = NULL
-) {
-  pt.size <- pt.size %||% AutoPointSize(data = data, raster = raster)
-  if ((nrow(x = data) > 1e5) & !isFALSE(raster)){
-    message("Rasterizing points since number of points exceeds 100,000.",
-            "\nTo disable this behavior set `raster=FALSE`")
-  }
-  raster <- raster %||% (nrow(x = data) > 1e5)
-  if (!is.null(x = raster.dpi)) {
-    if (!is.numeric(x = raster.dpi) || length(x = raster.dpi) != 2)
-      stop("'raster.dpi' must be a two-length numeric vector")
-  }
-  if (length(x = dims) != 2) {
-    stop("'dims' must be a two-length vector")
-  }
-  if (!is.data.frame(x = data)) {
-    data <- as.data.frame(x = data)
-  }
-  if (is.character(x = dims) && !all(dims %in% colnames(x = data))) {
-    stop("Cannot find dimensions to plot in data")
-  } else if (is.numeric(x = dims)) {
-    dims <- colnames(x = data)[dims]
-  }
-  if (!is.null(x = cells.highlight)) {
-    highlight.info <- SetHighlight(
-      cells.highlight = cells.highlight,
-      cells.all = rownames(x = data),
-      sizes.highlight = sizes.highlight %||% pt.size,
-      cols.highlight = cols.highlight,
-      col.base = cols[1] %||% '#C3C3C3',
-      pt.size = pt.size
-    )
-    order <- highlight.info$plot.order
-    data$highlight <- highlight.info$highlight
-    col.by <- 'highlight'
-    pt.size <- highlight.info$size
-    cols <- highlight.info$color
-  }
-  if (!is.null(x = order) && !is.null(x = col.by)) {
-    if (typeof(x = order) == "logical") {
-      if (order) {
-        data <- data[order(!is.na(x = data[, col.by]), data[, col.by]), ]
-      }
-    } else {
-      order <- rev(x = c(
-        order,
-        setdiff(x = unique(x = data[, col.by]), y = order)
-      ))
-      data[, col.by] <- factor(x = data[, col.by], levels = order)
-      new.order <- order(x = data[, col.by])
-      data <- data[new.order, ]
-      if (length(x = pt.size) == length(x = new.order)) {
-        pt.size <- pt.size[new.order]
-      }
-    }
-  }
-  if (!is.null(x = col.by) && !col.by %in% colnames(x = data)) {
-    warning("Cannot find ", col.by, " in plotting data, not coloring plot")
-    col.by <- NULL
-  } else {
-    # col.index <- grep(pattern = col.by, x = colnames(x = data), fixed = TRUE)
-    col.index <- match(x = col.by, table = colnames(x = data))
-    if (grepl(pattern = '^\\d', x = col.by)) {
-      # Do something for numbers
-      col.by <- paste0('x', col.by)
-    } else if (grepl(pattern = '-', x = col.by)) {
-      # Do something for dashes
-      col.by <- gsub(pattern = '-', replacement = '.', x = col.by)
-    }
-    colnames(x = data)[col.index] <- col.by
-  }
-  if (!is.null(x = shape.by) && !shape.by %in% colnames(x = data)) {
-    warning("Cannot find ", shape.by, " in plotting data, not shaping plot")
-  }
-  if (!is.null(x = alpha.by) && !alpha.by %in% colnames(x = data)) {
-    warning(
-      "Cannot find alpha variable ",
-      alpha.by,
-      " in data, setting to NULL",
-      call. = FALSE,
-      immediate. = TRUE
-    )
-    alpha.by <- NULL
-  }
-  
-  plot <- ggplot(data = data)
-  plot <- if (isTRUE(x = raster)) {
-    plot + geom_scattermore(
-      mapping = aes_string(
-        x = dims[1],
-        y = dims[2],
-        color = paste0("`", col.by, "`"),
-        shape = shape.by,
-        alpha = alpha.by
-      ),
-      pointsize = pt.size,
-      pixels = raster.dpi
-    )
-  } else {
-    plot + geom_point(
-      mapping = aes_string(
-        x = dims[1],
-        y = dims[2],
-        color = paste0("`", col.by, "`"),
-        shape = shape.by,
-        alpha = alpha.by
-      ),
-      size = pt.size
-    )
-  }
-  plot <- plot +
-    guides(color = guide_legend(override.aes = list(size = 3))) +
-    labs(color = NULL, title = col.by) +
-    CenterTitle()
-  if (label && !is.null(x = col.by)) {
-    plot <- LabelClusters(
-      plot = plot,
-      id = col.by,
-      repel = repel,
-      size = label.size
-    )
-  }
-  if (!is.null(x = cols)) {
-    if (length(x = cols) == 1 && (is.numeric(x = cols) || cols %in% rownames(x = brewer.pal.info))) {
-      scale <- scale_color_brewer(palette = cols, na.value = na.value)
-    } else if (length(x = cols) == 1 && (cols %in% c('alphabet', 'alphabet2', 'glasbey', 'polychrome', 'stepped'))) {
-      colors <- DiscretePalette(length(unique(data[[col.by]])), palette = cols)
-      scale <- scale_color_manual(values = colors, na.value = na.value)
-    } else {
-      scale <- scale_color_manual(values = cols, na.value = na.value)
-    }
-    plot <- plot + scale
-  }
-  plot <- plot + theme_cowplot()
-  return(plot)
-}
-
-
-
-
-
-
-
-DefaultDimReduc <- function(object, assay = NULL) {
-  object <- UpdateSlots(object = object)
-  assay <- assay %||% DefaultAssay(object = object)
-  drs.use <- c('umap', 'tsne', 'pca')
-  dim.reducs <- FilterObjects(object = object, classes.keep = 'DimReduc')
-  drs.assay <- Filter(
-    f = function(x) {
-      return(DefaultAssay(object = object[[x]]) == assay)
-    },
-    x = dim.reducs
-  )
-  if (length(x = drs.assay) > 0) {
-    index <- lapply(
-      X = drs.use,
-      FUN = grep,
-      x = drs.assay,
-      ignore.case = TRUE
-    )
-    index <- Filter(f = length, x = index)
-    if (length(x = index) > 0) {
-      return(drs.assay[min(index[[1]])])
-    }
-  }
-  index <- lapply(
-    X = drs.use,
-    FUN = grep,
-    x = dim.reducs,
-    ignore.case = TRUE
-  )
-  index <- Filter(f = length, x = index)
-  if (length(x = index) < 1) {
-    stop(
-      "Unable to find a DimReduc matching one of '",
-      paste(drs.use[1:(length(x = drs.use) - 1)], collapse = "', '"),
-      "', or '",
-      drs.use[length(x = drs.use)],
-      "', please specify a dimensional reduction to use",
-      call. = FALSE
-    )
-  }
-  return(dim.reducs[min(index[[1]])])
-}
-
-
-
-
-UpdateSlots <- function(object) {
-  object.list <- sapply(
-    X = slotNames(x = object),
-    FUN = function(x) {
-      return(tryCatch(
-        expr = slot(object = object, name = x),
-        error = function(...) {
-          return(NULL)
-        }
-      ))
-    },
-    simplify = FALSE,
-    USE.NAMES = TRUE
-  )
-  object.list <- Filter(f = Negate(f = is.null), x = object.list)
-  object.list <- c('Class' = class(x = object)[1], object.list)
-  object <- do.call(what = 'new', args = object.list)
-  for (x in setdiff(x = slotNames(x = object), y = names(x = object.list))) {
-    xobj <- slot(object = object, name = x)
-    if (is.vector(x = xobj) && !is.list(x = xobj) && length(x = xobj) == 0) {
-      slot(object = object, name = x) <- vector(
-        mode = class(x = xobj),
-        length = 1L
-      )
-    }
-  }
-  return(object)
-}
-
-
-SetQuantile <- function(cutoff, data) {
-  if (grepl(pattern = '^q[0-9]{1,2}$', x = as.character(x = cutoff), perl = TRUE)) {
-    this.quantile <- as.numeric(x = sub(
-      pattern = 'q',
-      replacement = '',
-      x = as.character(x = cutoff)
-    )) / 100
-    data <- unlist(x = data)
-    data <- data[data > 0]
-    cutoff <- quantile(x = data, probs = this.quantile)
-  }
-  return(as.numeric(x = cutoff))
-}
-
-
-
-AutoPointSize <- function(data, raster = NULL) {
-  return(ifelse(
-    test = isTRUE(x = raster),
-    yes = 1,
-    no = min(1583 / nrow(x = data), 1)
-  ))
-}
-
-
+#
+#
+# SingleDimPlot <- function(
+#     data,
+#     dims,
+#     col.by = NULL,
+#     cols = NULL,
+#     pt.size = NULL,
+#     shape.by = NULL,
+#     alpha.by = NULL,
+#     order = NULL,
+#     label = FALSE,
+#     repel = FALSE,
+#     label.size = 4,
+#     cells.highlight = NULL,
+#     cols.highlight = '#DE2D26',
+#     sizes.highlight = 1,
+#     na.value = 'grey50',
+#     raster = NULL,
+#     raster.dpi = NULL
+# ) {
+#   pt.size <- pt.size %||% AutoPointSize(data = data, raster = raster)
+#   if ((nrow(x = data) > 1e5) & !isFALSE(raster)){
+#     message("Rasterizing points since number of points exceeds 100,000.",
+#             "\nTo disable this behavior set `raster=FALSE`")
+#   }
+#   raster <- raster %||% (nrow(x = data) > 1e5)
+#   if (!is.null(x = raster.dpi)) {
+#     if (!is.numeric(x = raster.dpi) || length(x = raster.dpi) != 2)
+#       stop("'raster.dpi' must be a two-length numeric vector")
+#   }
+#   if (length(x = dims) != 2) {
+#     stop("'dims' must be a two-length vector")
+#   }
+#   if (!is.data.frame(x = data)) {
+#     data <- as.data.frame(x = data)
+#   }
+#   if (is.character(x = dims) && !all(dims %in% colnames(x = data))) {
+#     stop("Cannot find dimensions to plot in data")
+#   } else if (is.numeric(x = dims)) {
+#     dims <- colnames(x = data)[dims]
+#   }
+#   if (!is.null(x = cells.highlight)) {
+#     highlight.info <- SetHighlight(
+#       cells.highlight = cells.highlight,
+#       cells.all = rownames(x = data),
+#       sizes.highlight = sizes.highlight %||% pt.size,
+#       cols.highlight = cols.highlight,
+#       col.base = cols[1] %||% '#C3C3C3',
+#       pt.size = pt.size
+#     )
+#     order <- highlight.info$plot.order
+#     data$highlight <- highlight.info$highlight
+#     col.by <- 'highlight'
+#     pt.size <- highlight.info$size
+#     cols <- highlight.info$color
+#   }
+#   if (!is.null(x = order) && !is.null(x = col.by)) {
+#     if (typeof(x = order) == "logical") {
+#       if (order) {
+#         data <- data[order(!is.na(x = data[, col.by]), data[, col.by]), ]
+#       }
+#     } else {
+#       order <- rev(x = c(
+#         order,
+#         setdiff(x = unique(x = data[, col.by]), y = order)
+#       ))
+#       data[, col.by] <- factor(x = data[, col.by], levels = order)
+#       new.order <- order(x = data[, col.by])
+#       data <- data[new.order, ]
+#       if (length(x = pt.size) == length(x = new.order)) {
+#         pt.size <- pt.size[new.order]
+#       }
+#     }
+#   }
+#   if (!is.null(x = col.by) && !col.by %in% colnames(x = data)) {
+#     warning("Cannot find ", col.by, " in plotting data, not coloring plot")
+#     col.by <- NULL
+#   } else {
+#     # col.index <- grep(pattern = col.by, x = colnames(x = data), fixed = TRUE)
+#     col.index <- match(x = col.by, table = colnames(x = data))
+#     if (grepl(pattern = '^\\d', x = col.by)) {
+#       # Do something for numbers
+#       col.by <- paste0('x', col.by)
+#     } else if (grepl(pattern = '-', x = col.by)) {
+#       # Do something for dashes
+#       col.by <- gsub(pattern = '-', replacement = '.', x = col.by)
+#     }
+#     colnames(x = data)[col.index] <- col.by
+#   }
+#   if (!is.null(x = shape.by) && !shape.by %in% colnames(x = data)) {
+#     warning("Cannot find ", shape.by, " in plotting data, not shaping plot")
+#   }
+#   if (!is.null(x = alpha.by) && !alpha.by %in% colnames(x = data)) {
+#     warning(
+#       "Cannot find alpha variable ",
+#       alpha.by,
+#       " in data, setting to NULL",
+#       call. = FALSE,
+#       immediate. = TRUE
+#     )
+#     alpha.by <- NULL
+#   }
+#
+#   plot <- ggplot(data = data)
+#   plot <- if (isTRUE(x = raster)) {
+#     plot + geom_scattermore(
+#       mapping = aes_string(
+#         x = dims[1],
+#         y = dims[2],
+#         color = paste0("`", col.by, "`"),
+#         shape = shape.by,
+#         alpha = alpha.by
+#       ),
+#       pointsize = pt.size,
+#       pixels = raster.dpi
+#     )
+#   } else {
+#     plot + geom_point(
+#       mapping = aes_string(
+#         x = dims[1],
+#         y = dims[2],
+#         color = paste0("`", col.by, "`"),
+#         shape = shape.by,
+#         alpha = alpha.by
+#       ),
+#       size = pt.size
+#     )
+#   }
+#   plot <- plot +
+#     guides(color = guide_legend(override.aes = list(size = 3))) +
+#     labs(color = NULL, title = col.by) +
+#     CenterTitle()
+#   if (label && !is.null(x = col.by)) {
+#     plot <- LabelClusters(
+#       plot = plot,
+#       id = col.by,
+#       repel = repel,
+#       size = label.size
+#     )
+#   }
+#   if (!is.null(x = cols)) {
+#     if (length(x = cols) == 1 && (is.numeric(x = cols) || cols %in% rownames(x = brewer.pal.info))) {
+#       scale <- scale_color_brewer(palette = cols, na.value = na.value)
+#     } else if (length(x = cols) == 1 && (cols %in% c('alphabet', 'alphabet2', 'glasbey', 'polychrome', 'stepped'))) {
+#       colors <- DiscretePalette(length(unique(data[[col.by]])), palette = cols)
+#       scale <- scale_color_manual(values = colors, na.value = na.value)
+#     } else {
+#       scale <- scale_color_manual(values = cols, na.value = na.value)
+#     }
+#     plot <- plot + scale
+#   }
+#   plot <- plot + theme_cowplot()
+#   return(plot)
+# }
+#
+#
+#
+#
+#
+#
+#
+# DefaultDimReduc <- function(object, assay = NULL) {
+#   object <- UpdateSlots(object = object)
+#   assay <- assay %||% DefaultAssay(object = object)
+#   drs.use <- c('umap', 'tsne', 'pca')
+#   dim.reducs <- FilterObjects(object = object, classes.keep = 'DimReduc')
+#   drs.assay <- Filter(
+#     f = function(x) {
+#       return(DefaultAssay(object = object[[x]]) == assay)
+#     },
+#     x = dim.reducs
+#   )
+#   if (length(x = drs.assay) > 0) {
+#     index <- lapply(
+#       X = drs.use,
+#       FUN = grep,
+#       x = drs.assay,
+#       ignore.case = TRUE
+#     )
+#     index <- Filter(f = length, x = index)
+#     if (length(x = index) > 0) {
+#       return(drs.assay[min(index[[1]])])
+#     }
+#   }
+#   index <- lapply(
+#     X = drs.use,
+#     FUN = grep,
+#     x = dim.reducs,
+#     ignore.case = TRUE
+#   )
+#   index <- Filter(f = length, x = index)
+#   if (length(x = index) < 1) {
+#     stop(
+#       "Unable to find a DimReduc matching one of '",
+#       paste(drs.use[1:(length(x = drs.use) - 1)], collapse = "', '"),
+#       "', or '",
+#       drs.use[length(x = drs.use)],
+#       "', please specify a dimensional reduction to use",
+#       call. = FALSE
+#     )
+#   }
+#   return(dim.reducs[min(index[[1]])])
+# }
+#
+#
+#
+#
+# UpdateSlots <- function(object) {
+#   object.list <- sapply(
+#     X = slotNames(x = object),
+#     FUN = function(x) {
+#       return(tryCatch(
+#         expr = slot(object = object, name = x),
+#         error = function(...) {
+#           return(NULL)
+#         }
+#       ))
+#     },
+#     simplify = FALSE,
+#     USE.NAMES = TRUE
+#   )
+#   object.list <- Filter(f = Negate(f = is.null), x = object.list)
+#   object.list <- c('Class' = class(x = object)[1], object.list)
+#   object <- do.call(what = 'new', args = object.list)
+#   for (x in setdiff(x = slotNames(x = object), y = names(x = object.list))) {
+#     xobj <- slot(object = object, name = x)
+#     if (is.vector(x = xobj) && !is.list(x = xobj) && length(x = xobj) == 0) {
+#       slot(object = object, name = x) <- vector(
+#         mode = class(x = xobj),
+#         length = 1L
+#       )
+#     }
+#   }
+#   return(object)
+# }
+#
+#
+# SetQuantile <- function(cutoff, data) {
+#   if (grepl(pattern = '^q[0-9]{1,2}$', x = as.character(x = cutoff), perl = TRUE)) {
+#     this.quantile <- as.numeric(x = sub(
+#       pattern = 'q',
+#       replacement = '',
+#       x = as.character(x = cutoff)
+#     )) / 100
+#     data <- unlist(x = data)
+#     data <- data[data > 0]
+#     cutoff <- quantile(x = data, probs = this.quantile)
+#   }
+#   return(as.numeric(x = cutoff))
+# }
+#
+#
+#
+# AutoPointSize <- function(data, raster = NULL) {
+#   return(ifelse(
+#     test = isTRUE(x = raster),
+#     yes = 1,
+#     no = min(1583 / nrow(x = data), 1)
+#   ))
+# }
+#
+#
