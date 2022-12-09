@@ -65,7 +65,7 @@ DotPlot.ssc <- function(input, gene, group.by, split.by = NULL, point.by = "Pati
 
   # data frame for stat text of fraction cells with UMI detected.
   tmp <- tapply(input@assays$RNA@data[gene,],
-                apply(meta[,c(group.by, split.by)], 1, function(x) paste0(x, collapse = ":")),
+                apply(meta[,c(group.by, split.by),drop=F], 1, function(x) paste0(x, collapse = ":")),
                 function(x) c(mean(x), round(sum(x>0)/length(x), digits = 3)))
 
   df.stat <- data.frame(bar_mean = sapply(tmp, function(x) x[1]),
