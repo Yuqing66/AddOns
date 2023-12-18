@@ -1,8 +1,8 @@
 #' compact violin plots to fit more information in less space
 #'
 #' @description Comparing to the regular VlnPlot.ssc function, a few elements are ignored by default, including cell count in condition, proportion with positive values, dots for individual cell value, and mean expression level.
-#' Supports a few more options including horizontal violin, multiple genes, 
-#' 
+#' Supports a few more options including horizontal violin, multiple genes,
+#'
 #' @param object Seurat object.
 #' @param assay Assay of the seurat object for the expression values.
 #' @param slot Slot of the seurat object for the expression values.
@@ -29,28 +29,29 @@
 #' @param text_sizes Six elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size
 #' @param plot.theme ggplot theme. classic by default.
 #' @param title Plot title.
-#' @param colors 
+#' @param colors
 #' @examples
 #' genes <- c("IRF8","CLEC9A","XCR1","CLEC10A","CD14","CD209","CXCL9","IL1B","CCL17","JCHAIN","CD207","CCR7")
-#' VlnPlot.compact(srt, assay = "RNA", genes = genes, group.by = "subCellType.newmel", split.by = c("gene","subCellType.newmel"), 
-#' split.scale = "free", split.label.pos = c("left", "bottom"), split.label.textonly = T, 
+#' VlnPlot.compact(srt, assay = "RNA", genes = genes, group.by = "subCellType.newmel", split.by = c("gene","subCellType.newmel"),
+#' split.scale = "free", split.label.pos = c("left", "bottom"), split.label.textonly = T,
 #' split.label.rotate = "both", axis.hide = "both", flip = T, legend.hide = T)
-#' 
-#' VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) + 
+#'
+#' VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) +
 #'   theme(axis.text.x = element_text(angle = 90))
 #' @import ggplot2 dplyr
 #' @export
+#'
 
 
 
 
-VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, slot = "data", log_scale = F, colors = NULL, 
-                         split.by = NULL, spread = NULL, split.dir = "h", split.scale = "fixed", split.label.pos = "top", 
+VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, slot = "data", log_scale = F, colors = NULL,
+                         split.by = NULL, spread = NULL, split.dir = "h", split.scale = "fixed", split.label.pos = "top",
                          split.label.textonly = F, split.label.hide = "none", split.label.rotate = "none",
                          axis.hide = "none", legend.hide = F, flip = F,
-                         jitter_pts = F, plot_mean = F, size = 1, sig = 3, number_labels = F, text_sizes = c(15, 10, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic") 
+                         jitter_pts = F, plot_mean = F, size = 1, sig = 3, number_labels = F, text_sizes = c(15, 10, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic")
 {
-  
+
   df <- object@meta.data[, colnames(object@meta.data) %in% c(genes, group.by, split.by), drop = F]
   assay <- assay %||% DefaultAssay(object = object)
   DefaultAssay(object = object) <- assay
@@ -62,7 +63,7 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
   }else{
     colnames(df) <- sub(genes,"value",colnames(df))
   }
-  
+
   colnames(df) <- gsub("-", "", colnames(df))
   genes <- gsub("-", "", genes)
   if (any(!is.null(spread))) {
@@ -96,30 +97,30 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
     g <- g + theme_classic()
   }
   g <- g + labs(title = title, y = genes)
-  # g <- g + theme(plot.title = element_text(size = text_sizes[1]), 
-  #                axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), 
+  # g <- g + theme(plot.title = element_text(size = text_sizes[1]),
+  #                axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]),
   #                legend.title = element_text(size = text_sizes[4]), legend.text = element_text(size = text_sizes[5]))
-  # g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5), 
-  #                axis.title.x = element_blank(), axis.text.x = element_blank(), 
+  # g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5),
+  #                axis.title.x = element_blank(), axis.text.x = element_blank(),
   #                axis.ticks.x = element_blank())
   if (jitter_pts == T) {
-    g <- g + geom_jitter(aes_string(x = group.by, y = "plot", 
+    g <- g + geom_jitter(aes_string(x = group.by, y = "plot",
                                     col = group.by), width = 0.2, size = size)
   }
-  g <- g + geom_violin(aes_string(x = group.by, y = "plot", fill = group.by), 
+  g <- g + geom_violin(aes_string(x = group.by, y = "plot", fill = group.by),
                        col = "black", trim = T, scale = "width", alpha = alpha)
   if (number_labels == T) {
-    g <- g + stat_summary(aes_string(x = group.by, y = "value"), 
+    g <- g + stat_summary(aes_string(x = group.by, y = "value"),
                           fun.data = function(x) {
                             return(c(y = -max(df$plot)/25, label = length(x)))
                           }, colour = "black", geom = "text", size = text_sizes[7])
-    g <- g + stat_summary(aes_string(x = group.by, y = "value"), 
+    g <- g + stat_summary(aes_string(x = group.by, y = "value"),
                           fun.data = function(x) {
                             return(c(y = -max(df$plot)/10, label = round(mean(as.numeric(x > 0)), sig)))
                           }, colour = "black", geom = "text", size = text_sizes[7])
   }
   if (plot_mean == TRUE) {
-    scale <- max(df$plot)/max(tapply(df$value, INDEX = as.list(df[, colnames(df) %in% c(group.by, split.by), drop = F]), 
+    scale <- max(df$plot)/max(tapply(df$value, INDEX = as.list(df[, colnames(df) %in% c(group.by, split.by), drop = F]),
                                      FUN = mean), na.rm = T)
     g <- g + suppressWarnings(stat_summary(aes_string(x = group.by, y = "value"), fun.y = function(x) mean(x) * (scale * 0.5), colour = "black", geom = "point", size = 2))
     g <- g + scale_y_continuous(sec.axis = sec_axis(~./(scale * 0.5), name = "Mean Expression"))
@@ -131,7 +132,7 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
       g <- g + facet_wrap(facets = reformulate(split.by), dir = split.dir, scales = split.scale, strip.position = split.strip.pos, ncol = 1)
     }
   }else if (length(split.by) == 2) {
-    
+
     if(all(c("bottom","left") %in% split.label.pos)){
       lab.switch <- "both"
     }else if (split.label.pos == "left") {
@@ -140,14 +141,14 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
       lab.switch <- "x"
     }
     g <- g + facet_grid(facets = reformulate(split.by[1], split.by[2]), scales = split.scale, switch = lab.switch)
-    
+
   }else if (length(split.by) > 2) {
     stop("Parameter split.by needs to be a string with equal or less than two variables.")
   }
   if (split.label.textonly){
     g <- g + theme(strip.background = element_blank())
   }
-  
+
   # hide x not working
   if (split.label.hide == "y"){
     g <- g + theme(strip.background.y = element_blank(), strip.text.y = element_blank())
@@ -164,7 +165,7 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
   }else if (axis.hide == "both"){
     g <- g + theme(axis.text = element_blank(), axis.ticks = element_blank())
   }
-  
+
   # mmay need left right bottom top???
   if (split.label.rotate == "x"){
     g <- g + theme(strip.text.x.bottom = element_text(angle = 90))
@@ -176,12 +177,12 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
   if (legend.hide){
     g <- g + theme(legend.position = "none")
   }
-  
+
   if (flip){
     g <- g + coord_flip()
   }
-  
-  if (!is.null(split.by)) 
+
+  if (!is.null(split.by))
     g <- g + theme(strip.text.x = element_text(size = text_sizes[6]))
   return(g)
 }

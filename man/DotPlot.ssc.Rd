@@ -2,7 +2,7 @@
 % Please edit documentation in R/DotPlot.ssc.R
 \name{DotPlot.ssc}
 \alias{DotPlot.ssc}
-\title{DotPlot.ssc with sample mean as each dot.}
+\title{DotPlot.ssc with sample mean as each dot, weighted mean as bar.}
 \usage{
 DotPlot.ssc(
   input,
@@ -21,7 +21,8 @@ DotPlot.ssc(
   jitter.size = 2,
   col.trans = "",
   bar = T,
-  link = FALSE
+  link = FALSE,
+  ttest = F
 )
 }
 \arguments{
@@ -47,12 +48,22 @@ even when we split by Disease. So we spread HealthyControl condition in Disease 
 
 \item{theme}{ggplot theme. classic by default.}
 
+\item{jitter.alpha}{Alpha of dots.}
+
+\item{jitter.width}{Spread out width of dots.}
+
+\item{jitter.size}{Size of dots.}
+
 \item{col.trans}{Set to "log" to make color scale zoom in to lower values}
 
 \item{bar}{Plot weighted mean as a bar if TRUE.}
 
 \item{link}{Link the paired conditions in each panel. However, the starting and ending points cannot adjust according to
 the horizontal location of jitter plot. Can set a lower value for jitter.width to shrink the blank distance.}
+
+\item{num.cutoff.rm}{Keep the grey dots not passing the num.cutoff threshold or remove them.}
+
+\item{jitter.col}{Whether to color dots based on number of cells within, or leave dots black.}
 }
 \description{
 To evaluate a gene's consistency across patients, it's useful to know the expression
