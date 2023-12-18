@@ -21,6 +21,10 @@ VlnPlot.xlabel <- function (object, gene, group.by, group.order = NULL, split.or
   assay <- assay %||% DefaultAssay(object = object)
   DefaultAssay(object = object) <- assay
   geneExp <- FetchData(object = object, vars = gene, slot = slot)
+  if (sum(geneExp) == 0){
+    warning("No expression in data")
+    return()
+  }
   colnames(geneExp) <- "value"
   df <- cbind(df, geneExp)
   if (!is.null(group.order)) df[,group.by] <- factor(df[,group.by], levels = group.order)

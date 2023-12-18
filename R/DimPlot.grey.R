@@ -1,32 +1,22 @@
-#' DimPlot with grey background in split panels
-#'
-#' @description In Seurat DimPlot function, split.by parameter allows cells to be splited into
-#' separate panels according to a meta column. However, it's sometimes hard to compare across panels because
-#' some clusters are not existed in some conditions, and therefore the look of embeddings in each panel can
-#' look drastically different.
-#'
-#' To locate cells on the full embedding easier, this function plot cells in other panels in grey at the back,
-#' providing a shape of the full embedding.
-#'
-#' @param ... same as Seurat DimPlot function.
-#' @examples
-#' DimPlot.grey(srt, group.by = "Disease", split.by = "Disease")
-#' @import ggplot2
-#' @export
+# In this new version, default environment colors are used
 
+# In seurat DimPlot function, split.by argument allows to facet data points into different plots,
+# but unlike SingallingSingleCell package, the cells belong to other plots are not shown instead of gray dots,
+# making it hard to relate cells to full data map.
+# This function is plotting split.by with grey dots for seurat objects
 
+# had trouble with DefaultDimReduc and SingleDimPlot functions
 
 DimPlot.grey <- function(
-    object,
-    dims = c(1, 2),
-    pt.size = 0.2,
-    reduction = "umap",
-    group.by = NULL,
-    split.by = NULL,
-    shape.by = NULL,
-    shuffle = F,
-    ncol = NULL,
-    back.col = "lightgrey") {
+  object,
+  dims = c(1, 2),
+  pt.size = 0.2,
+  reduction = "umap",
+  group.by = NULL,
+  split.by = NULL,
+  shape.by = NULL,
+  shuffle = F,
+  ncol = NULL) {
   if (length(x = dims) != 2) {
     stop("'dims' must be a two-length vector")
   }
@@ -54,13 +44,14 @@ DimPlot.grey <- function(
     data <- data[sample(x = 1:nrow(x = data)), ]
   }
   g <- ggplot() +
-    geom_point(data = data[, dims], mapping = aes(x=get(dims[1]), y=get(dims[2])), col = back.col, size = 0.1)
+    geom_point(data = data[, dims], mapping = aes(x=get(dims[1]), y=get(dims[2])), col = "lightgrey", size = 0.1)
 
-  g <- g + geom_point(data = data, mapping = aes(x=get(dims[1]), y=get(dims[2]), col=get(group.by)), size = pt.size) +
+  g <- g + geom_point(data = data, mapping = aes_string(x=dims[1], y=dims[2], fill=group.by),colour="black", shape = 21, stroke=0.2) +
     xlab(dims[1]) + ylab(dims[2]) + theme_classic() + labs(col=group.by)
   if (!is.null(split.by)){
     g <- g + facet_wrap(reformulate(split.by), ncol = ncol)
   }
-
+  g <- g + scale_fill_manual(values=colors.celltype$V2[match(levels(data$subCellType.ificc.main),
+                                                             colors.celltype$V1)])
   return(g)
 }
