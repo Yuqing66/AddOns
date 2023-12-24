@@ -31,7 +31,9 @@ VlnPlot.compact(
   number_labels = F,
   text_sizes = c(15, 10, 7, 10, 7, 7, 2.5),
   alpha = 0.5,
-  theme = "classic"
+  theme = "classic",
+  violin.linewidth = 1,
+  gene.group.color = NULL
 )
 }
 \arguments{
@@ -82,6 +84,12 @@ even when we split by Disease. So we spread HealthyControl condition in Disease 
 
 \item{text_sizes}{Six elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size}
 
+\item{violin.linewidth}{Width of the violin borders.}
+
+\item{gene.group.color}{Color by group of genes instead of meta data. A named list with gene names in each element}
+
+\item{color.by}{}
+
 \item{plot.theme}{ggplot theme. classic by default.}
 }
 \description{
@@ -90,10 +98,10 @@ Supports a few more options including horizontal violin, multiple genes,
 }
 \examples{
 genes <- c("IRF8","CLEC9A","XCR1","CLEC10A","CD14","CD209","CXCL9","IL1B","CCL17","JCHAIN","CD207","CCR7")
-VlnPlot.compact(srt, assay = "RNA", genes = genes, group.by = "subCellType.newmel", split.by = c("gene","subCellType.newmel"),
-split.scale = "free", split.label.pos = c("left", "bottom"), split.label.textonly = T,
+VlnPlot.compact(srt, assay = "RNA", genes = genes, group.by = "subCellType.newmel", split.by = c("gene","subCellType.newmel"), 
+split.scale = "free", split.label.pos = c("left", "bottom"), split.label.textonly = T, 
 split.label.rotate = "both", axis.hide = "both", flip = T, legend.hide = T)
 
-VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) +
+VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) + 
   theme(axis.text.x = element_text(angle = 90))
 }
