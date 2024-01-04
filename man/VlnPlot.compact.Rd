@@ -12,14 +12,12 @@ VlnPlot.compact(
   assay = NULL,
   slot = "data",
   log_scale = F,
-  colors = NULL,
   split.by = NULL,
   spread = NULL,
   split.dir = "h",
   split.scale = "fixed",
-  split.label.pos = "top",
+  split.label.pos = c("top", "right"),
   split.label.textonly = F,
-  split.label.hide = "none",
   split.label.rotate = "none",
   axis.hide = "none",
   legend.hide = F,
@@ -29,11 +27,13 @@ VlnPlot.compact(
   size = 1,
   sig = 3,
   number_labels = F,
-  text_sizes = c(15, 10, 7, 10, 7, 7, 2.5),
+  text_sizes = c(15, 0, 7, 10, 7, 7, 2.5),
   alpha = 0.5,
   theme = "classic",
   violin.linewidth = 1,
-  gene.group.color = NULL
+  gene.group.color = NULL,
+  custom.colors = NULL,
+  violin.hide.cutoff = NULL
 )
 }
 \arguments{
@@ -60,11 +60,9 @@ even when we split by Disease. So we spread HealthyControl condition in Disease 
 
 \item{split.scale}{Split panels share the same axis scale "fixed" (default), or use different scales "free".}
 
-\item{split.label.pos}{When split by two variables, put the universal label at the top and right as default, or "bottom", or "left".}
+\item{split.label.pos}{Put the split panel label at the top and/or right as default, or choose "bottom" "left".}
 
 \item{split.label.textonly}{Remove the rectangular frame from the panel labels. FALSE by default.}
-
-\item{split.label.hide}{Remove panel labels. "none" by default. "x" "y" "both" as options.}
 
 \item{split.label.rotate}{Rotate the label for 90 degrees. "none" by default. "x" "y" "both" as options.}
 
@@ -74,21 +72,25 @@ even when we split by Disease. So we spread HealthyControl condition in Disease 
 
 \item{flip}{Change the violin plots to horizontal direction.}
 
-\item{jitter_pts}{dot for value of each individual cell. FALSE by default.}
+\item{jitter_pts}{Dot for value of each individual cell. FALSE by default.}
 
-\item{plot_mean}{plot the mean expression level as a black dot. FALSE by default.}
+\item{plot_mean}{Plot the mean expression level as a black dot. FALSE by default.}
+
+\item{size}{Dot size of jitter plot.}
 
 \item{sig}{Significant number of the cell proportion with positive values.}
 
 \item{number_labels}{Show stats at the bottom of the plot if TRUE. Total cell number in that condition.}
 
-\item{text_sizes}{Six elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size}
+\item{text_sizes}{Seven elements in order: plot title, axis title, axis text, legend title, legend text, split, stat size}
 
 \item{violin.linewidth}{Width of the violin borders.}
 
 \item{gene.group.color}{Color by group of genes instead of meta data. A named list with gene names in each element}
 
-\item{color.by}{}
+\item{custom.colors}{A vector with RGB colors as values. If with names, colors will be assigned to specific groups.}
+
+\item{violin.hide.cutoff}{When a condition has too few cells, the violin plot can be misleading. Hide violin plots when condition has cells fewer than this.}
 
 \item{plot.theme}{ggplot theme. classic by default.}
 }
@@ -98,10 +100,10 @@ Supports a few more options including horizontal violin, multiple genes,
 }
 \examples{
 genes <- c("IRF8","CLEC9A","XCR1","CLEC10A","CD14","CD209","CXCL9","IL1B","CCL17","JCHAIN","CD207","CCR7")
-VlnPlot.compact(srt, assay = "RNA", genes = genes, group.by = "subCellType.newmel", split.by = c("gene","subCellType.newmel"), 
-split.scale = "free", split.label.pos = c("left", "bottom"), split.label.textonly = T, 
+VlnPlot.compact(srt, assay = "RNA", genes = genes, group.by = "subCellType.newmel", split.by = c("gene","subCellType.newmel"),
+split.scale = "free", split.label.pos = c("left", "bottom"), split.label.textonly = T,
 split.label.rotate = "both", axis.hide = "both", flip = T, legend.hide = T)
 
-VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) + 
+VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) +
   theme(axis.text.x = element_text(angle = 90))
 }
