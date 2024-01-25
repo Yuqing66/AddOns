@@ -14,7 +14,6 @@
 #' @param num.cutoff.rm Keep the grey dots not passing the num.cutoff threshold or remove them.
 #' @param title Plot title.
 #' @param number_labels Show stats at the bottom of the plot if TRUE. Total cell number in that condition.
-#' @param text_sizes Seven elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size.
 #' @param spread Control skin is only in HealthyControl in Disease meta column, but we want to compare them to other skins in all diseases
 #' even when we split by Disease. So we spread HealthyControl condition in Disease column, by spread = c("Disease", "HealthyControl").
 #' @param theme ggplot theme. classic by default.
@@ -33,115 +32,115 @@
 #' @export
 
 PercentPlot.single <- function(
-    object, numerator, numerator.column, denominator, denominator.column = NULL,
-    group.by, split.by = NULL, point.by = "Patient", spread = NULL, num.cutoff = 20, num.cutoff.rm = F,
-    number.labels = T, xaxis.labels = F, title = "", theme = "classic",
-    text.size.plot.title = 20, text.size.axis.title = 10, text.size.axis.text = 10,
-    text.size.legend.title = 10, text.size.legend.text = 5, text.size.panel = 5,
-    jitter.alpha = 0.5, jitter.width = 0.1, jitter.size = 2, jitter.col = T, col.trans = "identity",
-    bar = T, link = FALSE, ttest = F){
-  # get meta data
-  meta <- data.frame(numer=object@meta.data[,numerator.column],
-                     denom=object@meta.data[,denominator.column],
-                     group=object@meta.data[,group.by],
-                     split=object@meta.data[,split.by],
-                     point=object@meta.data[,point.by])
-  colnames(meta) <- c("numer","denom",group.by, split.by, point.by)
+object, numerator, numerator.column, denominator, denominator.column = NULL,
+group.by, split.by = NULL, point.by = "Patient", spread = NULL, num.cutoff = 20, num.cutoff.rm = F,
+number.labels = T, xaxis.labels = F, title = "", theme = "classic",
+text.size.plot.title = 20, text.size.axis.title = 10, text.size.axis.text = 10,
+text.size.legend.title = 10, text.size.legend.text = 5, text.size.panel = 5,
+jitter.alpha = 0.5, jitter.width = 0.1, jitter.size = 2, jitter.col = T, col.trans = "identity",
+bar = T, link = FALSE, ttest = F){
+# get meta data
+meta <- data.frame(numer=object@meta.data[,numerator.column],
+denom=object@meta.data[,denominator.column],
+group=object@meta.data[,group.by],
+split=object@meta.data[,split.by],
+point=object@meta.data[,point.by])
+colnames(meta) <- c("numer","denom",group.by, split.by, point.by)
 
-  # keep the order
-  group.by.levels <- levels(object@meta.data[, group.by])
-  if (!is.null(group.by.levels)) meta[, group.by] <- factor(meta[, group.by], levels = group.by.levels)
+# keep the order
+group.by.levels <- levels(object@meta.data[, group.by])
+if (!is.null(group.by.levels)) meta[, group.by] <- factor(meta[, group.by], levels = group.by.levels)
 
-  # Suppress summarise info
-  options(dplyr.summarise.inform = FALSE)
+# Suppress summarise info
+options(dplyr.summarise.inform = FALSE)
 
-  # calculate proportion and number of cells in condition
-  meta.dot <- meta %>% filter(denom %in% denominator) %>%
-    group_by_at(vars(one_of(c(group.by, split.by, point.by)))) %>%
-    # group_by(group, split, point) %>%
-    summarise(prop=sum(numer %in% numerator)/length(denom),
-              denomNum=length(denom)) %>%
-    mutate(numColor=replace(denomNum, which(denomNum < num.cutoff), NA))
+# calculate proportion and number of cells in condition
+meta.dot <- meta %>% filter(denom %in% denominator) %>%
+group_by_at(vars(one_of(c(group.by, split.by, point.by)))) %>%
+# group_by(group, split, point) %>%
+summarise(prop=sum(numer %in% numerator)/length(denom),
+denomNum=length(denom)) %>%
+mutate(numColor=replace(denomNum, which(denomNum < num.cutoff), NA))
 
-  # remove dots not passing cell number threshold from downstream process.
-  # mean calculation, plotting and t-test
-  if (num.cutoff.rm){
-    meta.dot <- meta.dot %>% filter(!is.na(numColor))
-  }
+# remove dots not passing cell number threshold from downstream process.
+# mean calculation, plotting and t-test
+if (num.cutoff.rm){
+meta.dot <- meta.dot %>% filter(!is.na(numColor))
+}
 
-  # spread Control skin to disease conditions
-  # spread = c("DiseaseFiner", "HealthyControl")
-  if (any(!is.null(spread))) {
-    others <- setdiff(unique(meta[, spread[1]]), spread[2])
-    ind <- which(meta.dot[, spread[1]] == spread[2])
-    rmmeta <- meta.dot[ind, ]
-    meta.dot <- meta.dot[-ind, ]
-    for (i in 1:length(others)) {
-      rmmeta[, spread[1]] <- others[i]
-      meta.dot <- rbind(meta.dot, rmmeta)
-    }
-  }
+# spread Control skin to disease conditions
+# spread = c("DiseaseFiner", "HealthyControl")
+if (any(!is.null(spread))) {
+others <- setdiff(unique(meta[, spread[1]]), spread[2])
+ind <- which(meta.dot[, spread[1]] == spread[2])
+rmmeta <- meta.dot[ind, ]
+meta.dot <- meta.dot[-ind, ]
+for (i in 1:length(others)) {
+rmmeta[, spread[1]] <- others[i]
+meta.dot <- rbind(meta.dot, rmmeta)
+}
+}
 
-  # calculate proportion and number of cells per bar
-  meta.bar <- meta.dot %>% group_by_at(vars(one_of(c(group.by, split.by)))) %>%
-    summarise(prop=round(sum(prop*denomNum)/sum(denomNum), 3),
-              denomNum=sum(denomNum))
+# calculate proportion and number of cells per bar
+meta.bar <- meta.dot %>% group_by_at(vars(one_of(c(group.by, split.by)))) %>%
+summarise(prop=round(sum(prop*denomNum)/sum(denomNum), 3),
+denomNum=sum(denomNum))
 
-  g <- ggplot(meta.dot)
+g <- ggplot(meta.dot)
   if (number.labels == T) {
-    g <- g + geom_text(data = meta.bar, aes_string(x = group.by, y = -max(meta.bar$prop)/25, label = "prop"), size = text_sizes[7])
-    g <- g + geom_text(data = meta.bar, aes_string(x = group.by, y = -max(meta.bar$prop)/10, label = "denomNum"), size = text_sizes[7])
-  }
+g <- g + geom_text(data = meta.bar, aes_string(x = group.by, y = -max(meta.bar$prop)/25, label = "prop"), size = 2.5)
+g <- g + geom_text(data = meta.bar, aes_string(x = group.by, y = -max(meta.bar$prop)/10, label = "denomNum"), size = 2.5)
+}
   if (!is.null(theme)) g <- g + eval(call(paste0("theme_",theme)))
   if (title == "") title <- paste0("Percentage of ", numerator, " in ", denominator)
-  g <- g + labs(title = title, y = "Percentage")
-  g <- g + theme(plot.title = element_text(size = text.size.plot.title),
-                 axis.title = element_text(size = text.size.axis.title), axis.text = element_text(size = text.size.axis.text),
-                 legend.title = element_text(size = text.size.legend.title), legend.text = element_text(size = text.size.legend.text))
-  g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
+g <- g + labs(title = title, y = "Percentage")
+g <- g + theme(plot.title = element_text(size = text.size.plot.title),
+axis.title = element_text(size = text.size.axis.title), axis.text = element_text(size = text.size.axis.text),
+legend.title = element_text(size = text.size.legend.title), legend.text = element_text(size = text.size.legend.text))
+g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if (jitter.col){
-    g <- g + geom_jitter(aes_string(x = group.by, y = "prop", col = "numColor"),
-                         width = jitter.width, size = jitter.size, alpha = jitter.alpha)
-    g <- g + scale_color_gradientn(colors = c("blue", "red", "orange"), trans=col.trans)
-  }else{
-    g <- g + geom_jitter(aes_string(x = group.by, y = "prop"),
-                         width = jitter.width, size = jitter.size, alpha = jitter.alpha)
-  }
-  g <- g + scale_y_continuous(labels = scales::percent)
+g <- g + geom_jitter(aes_string(x = group.by, y = "prop", col = "numColor"),
+width = jitter.width, size = jitter.size, alpha = jitter.alpha)
+g <- g + scale_color_gradientn(colors = c("blue", "red", "orange"), trans=col.trans)
+}else{
+g <- g + geom_jitter(aes_string(x = group.by, y = "prop"),
+width = jitter.width, size = jitter.size, alpha = jitter.alpha)
+}
+g <- g + scale_y_continuous(labels = scales::percent)
   if (!(xaxis.labels)) g <- g + theme(axis.text.x = element_blank())
   if (bar) {
-    g <- g + geom_col(data = meta.bar, aes_string(x = group.by, y = "prop", fill = group.by), alpha = 0.3)
-  }
+g <- g + geom_col(data = meta.bar, aes_string(x = group.by, y = "prop", fill = group.by), alpha = 0.3)
+}
   if (link) {
-    g <- g + geom_line(aes_string(x = group.by, y = "prop", group = point.by), alpha = 0.8)
-  }
+g <- g + geom_line(aes_string(x = group.by, y = "prop", group = point.by), alpha = 0.8)
+}
   if (length(split.by) == 1) {
-    g <- g + facet_grid(facets = reformulate(split.by),
-                        scales = "free_x", space = "free_x") +
-      theme(strip.text.x = element_text(size = text.size.panel))
-  }else if (length(split.by) == 2) {
-    g <- g + facet_grid(facets = reformulate(split.by[1], split.by[2]),
-                        scales = "free_x", space = "free_x") +
-      theme(strip.text.x = element_text(size = text.size.panel),
-            strip.text.y = element_text(size = text.size.panel))
-  }else if (length(split.by) > 2) {
-    stop("Parameter split.by needs to be a string with equal or less than two variables.")
-  }
+g <- g + facet_grid(facets = reformulate(split.by),
+scales = "free_x", space = "free_x") +
+theme(strip.text.x = element_text(size = text.size.panel))
+}else if (length(split.by) == 2) {
+g <- g + facet_grid(facets = reformulate(split.by[1], split.by[2]),
+scales = "free_x", space = "free_x") +
+theme(strip.text.x = element_text(size = text.size.panel),
+strip.text.y = element_text(size = text.size.panel))
+}else if (length(split.by) > 2) {
+stop("Parameter split.by needs to be a string with equal or less than two variables.")
+}
   if (ttest == F){
-    return(g)
-  }else{
+return(g)
+}else{
     # do t-test on dots pass filter (with more than a certain number of cells)
-    df.ttest <- as.data.frame(meta.dot)
-    list.ttest <- list()
+df.ttest <- as.data.frame(meta.dot)
+list.ttest <- list()
     if (is.null(split.by)){
-      #  t-test all
-      list.ttest[[1]] <- df.ttest
-    }else{
+      # t-test all
+list.ttest[[1]] <- df.ttest
+}else{
       # plot split in multiple panels. Do t-test across groups with in each panel
-      list.ttest <- split(df.ttest, df.ttest[,split.by])
-    }
-    ttestresult <- vector("list", length(list.ttest))
-    names(ttestresult) <- names(list.ttest)
+list.ttest <- split(df.ttest, df.ttest[,split.by])
+}
+ttestresult <- vector("list", length(list.ttest))
+names(ttestresult) <- names(list.ttest)
     for (i.tb in 1:length(list.ttest)){
       tb <- list.ttest[[i.tb]]
       groups <- unique(as.character(tb[,group.by]))
