@@ -18,6 +18,7 @@ VlnPlot.ssc(
   colors = NULL,
   spread = NULL,
   jitter_pts = T,
+  violin.linewidth = 1,
   plot_mean = T,
   size = 1,
   sig = 3,
@@ -50,6 +51,8 @@ VlnPlot.ssc(
 even when we split by Disease. So we spread HealthyControl condition in Disease column, by spread = c("Disease", "HealthyControl").}
 
 \item{jitter_pts}{Overlay a jitter plot over violin plot if TRUE.}
+
+\item{violin.linewidth}{Width of the violin borders.}
 
 \item{plot_mean}{Plot the mean UMI value in black dot if TRUE.}
 

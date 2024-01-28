@@ -47,11 +47,11 @@
 
 
 VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, slot = "data", log_scale = F,
-                         split.by = NULL, spread = NULL, split.dir = "h", split.scale = "fixed", split.label.pos = c("top","right"),
-                         split.label.textonly = F, split.label.rotate = "none",
-                         axis.hide = "none", legend.hide = F, flip = F,
+                         split.by = NULL, spread = NULL, split.dir = "h", split.scale = "free", split.label.pos = c("left", "bottom"),
+                         split.label.textonly = T, split.label.rotate = "both",
+                         axis.hide = "both", legend.hide = F, flip = T,
                          jitter_pts = F, plot_mean = F, size = 1, sig = 3, number_labels = F,
-                         text_sizes = c(15, 0, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic", violin.linewidth = 1,
+                         text_sizes = c(15, 0, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic", violin.linewidth = 0.02,
                          gene.group.color = NULL, custom.colors = NULL, violin.hide.cutoff = NULL)
 {
   ### get data

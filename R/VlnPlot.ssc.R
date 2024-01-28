@@ -22,6 +22,7 @@
 #' @param text_sizes Seven elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size.
 #' @param alpha Transparency of violin plot.
 #' @param theme ggplot theme. classic by default.
+#' @param violin.linewidth Width of the violin borders.
 #'
 #' @examples
 #' VlnPlot.ssc(srt, gene = "CXCL10", group.by = "Skin", split.by = c("CellType", "Disease"), spread = c("Disease", "HealthyControl"), assay = "RNA")
@@ -35,7 +36,7 @@
 
 
 VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = NULL, split.order = NULL, title = "", assay = "RNA", slot = "data", log_scale = F,
-                         colors = NULL, spread = NULL, jitter_pts = T,
+                         colors = NULL, spread = NULL, jitter_pts = T, violin.linewidth = 1,
                          plot_mean = T, size = 1, sig = 3, number_labels = T, text_sizes = c(15, 10, 7, 10, 7, 7, 2.5), alpha = 0.5, theme = "classic")
 {
 
@@ -95,7 +96,7 @@ VlnPlot.ssc <- function (object, gene, group.by, group.order = NULL, split.by = 
     g <- g + geom_jitter(aes_string(x = group.by, y = "plot",
                                     col = group.by), width = 0.2, size = size)
   g <- g + geom_violin(aes_string(x = group.by, y = "plot",
-                                  fill = group.by), col = "black", trim = T, scale = "width", alpha = alpha)
+                                  fill = group.by), col = "black", trim = T, scale = "width", alpha = alpha, linewidth = violin.linewidth)
   if (number_labels == T) {
     g <- g + stat_summary(aes_string(x = group.by, y = "value"),
                           fun.data = function(x) {
