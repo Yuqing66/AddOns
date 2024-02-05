@@ -80,8 +80,6 @@ even when we split by Disease. So we spread HealthyControl condition in Disease 
 the horizontal location of jitter plot. Can set a lower value for jitter.width to shrink the blank distance.}
 
 \item{number_labels}{Show stats at the bottom of the plot if TRUE. Total cell number in that condition.}
-
-\item{text_sizes}{Seven elements in order: plot title, axis title, axis text, legene title, legend text, split, stat size.}
 }
 \description{
 

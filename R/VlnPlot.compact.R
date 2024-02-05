@@ -40,13 +40,18 @@
 #'
 #' VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) +
 #'   theme(axis.text.x = element_text(angle = 90))
+#'
+#' srt$IFNs <- apply(srt@assays$RNA@data[grep("^IFN",rownames(srt)),], 2, sum)
+#' srt@meta.data[,"CXCL9/10/11"] <- apply(srt@assays$RNA@data[c("CXCL9","CXCL10","CXCL11"),], 2, sum)
+#' VlnPlot.compact2(srt, genes = c("CXCL9","KRT5","IFNs","CXCL9/10/11"), val.in.meta = c("IFNs","CXCL9/10/11"),
+#'                  group.by = "CellType", split.by = c("gene","CellType"), split.scale = "free")
 #' @import ggplot2 dplyr
 #' @export
 
 
 
 
-VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, slot = "data", log_scale = F,
+VlnPlot.compact <- function (object, genes, val.in.meta = NULL, group.by, title = "", assay = NULL, slot = "data", log_scale = F,
                          split.by = NULL, spread = NULL, split.dir = "h", split.scale = "free", split.label.pos = c("left", "bottom"),
                          split.label.textonly = T, split.label.rotate = "both",
                          axis.hide = "both", legend.hide = F, flip = T,
@@ -55,13 +60,13 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
                          gene.group.color = NULL, custom.colors = NULL, violin.hide.cutoff = NULL)
 {
   ### get data
-  df <- object@meta.data[, colnames(object@meta.data) %in% c(genes, group.by, split.by), drop = F]
+  df <- object@meta.data[, colnames(object@meta.data) %in% c(val.in.meta, group.by, split.by), drop = F]
   assay <- assay %||% DefaultAssay(object = object)
   DefaultAssay(object = object) <- assay
-  geneExp <- FetchData(object = object, vars = genes, slot = slot)
+  geneExp <- FetchData(object = object, vars = setdiff(genes, val.in.meta), slot = slot)
   df <- cbind(df, geneExp)
   if (length(genes) > 1){
-    df <- df %>% pivot_longer(cols = which(colnames(df) %in% genes), names_to = "gene", values_to = "value")
+    df <- df %>% pivot_longer(cols = which(colnames(df) %in% c(genes,val.in.meta)), names_to = "gene", values_to = "value")
     df$gene <- factor(df$gene, levels = genes)
   }else{
     colnames(df) <- sub(genes,"value",colnames(df))
@@ -178,7 +183,7 @@ VlnPlot.compact <- function (object, genes, group.by, title = "", assay = NULL, 
     }else{
       lab.switch <- NULL
     }
-    g <- g + facet_grid(facets = reformulate(split.by[1], split.by[2]), scales = split.scale, space = "free",
+    g <- g + facet_grid(facets = reformulate(split.by[1], split.by[2]), scales = split.scale, space = "fixed",
                         switch = lab.switch) +
       theme(strip.placement = "outside")
   }else if (length(split.by) > 2) {

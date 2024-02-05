@@ -7,6 +7,7 @@
 VlnPlot.compact(
   object,
   genes,
+  val.in.meta = NULL,
   group.by,
   title = "",
   assay = NULL,
@@ -106,4 +107,9 @@ split.label.rotate = "both", axis.hide = "both", flip = T, legend.hide = T)
 
 VlnPlot.compact(srt, genes = "CXCL9", group.by = "subCellType.newmel", legend.hide = T) +
   theme(axis.text.x = element_text(angle = 90))
+
+srt$IFNs <- apply(srt@assays$RNA@data[grep("^IFN",rownames(srt)),], 2, sum)
+srt@meta.data[,"CXCL9/10/11"] <- apply(srt@assays$RNA@data[c("CXCL9","CXCL10","CXCL11"),], 2, sum)
+VlnPlot.compact2(srt, genes = c("CXCL9","KRT5","IFNs","CXCL9/10/11"), val.in.meta = c("IFNs","CXCL9/10/11"),
+                 group.by = "CellType", split.by = c("gene","CellType"), split.scale = "free")
 }
