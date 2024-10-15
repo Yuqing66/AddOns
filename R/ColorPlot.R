@@ -5,15 +5,14 @@
 #' @param colors.ved a vector with RGB colors in format "#354C31"
 #' @param n.col number of columns for the color matrix
 #' @examples
-# colors.custom <- c("#354C31", "#354C45", "#313E4C",
-#                    "#342F4B", "#414749", "#3E6C72")
-# ColorPlot(colors.custom, n.col = 3, n.row = 2)
-#
-# colors.celltype <- as.data.frame(matrix(data = c("KC","#3F837A",
-#                                                  "TC","#A55F6F",
-#                                                  "IC","#8659AC",
-#                                                  "MEL","#3E6D95"), ncol = 2, byrow = T))
-# ColorPlot(colors.celltype$V2, n.col = 2, n.row = 2, label = colors.celltype$V1)
+#' colors.custom <- c("#354C31", "#354C45", "#313E4C",
+#'                    "#342F4B", "#414749", "#3E6C72")
+#' ColorPlot(colors.custom, n.col = 3, n.row = 2)
+#' colors.celltype <- as.data.frame(matrix(data = c("KC","#3F837A",
+#'                                                  "TC","#A55F6F",
+#'                                                  "IC","#8659AC",
+#'                                                  "MEL","#3E6D95"), ncol = 2, byrow = T))
+#' ColorPlot(colors.celltype$V2, n.col = 2, n.row = 2, label = colors.celltype$V1)
 #' @import ggplot2
 #' @export
 

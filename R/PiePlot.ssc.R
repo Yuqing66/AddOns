@@ -1,6 +1,7 @@
-#' percent plot with denominator and devider specified.
+#' percent plot with denominator and divider specified.
 #'
-#' @description 
+#' @description
+#' This function uses a pie plot to show the percentage of each group in the total. The denominator and divider can be specified to normalize the percentage.
 #'
 #' @param object Seurat object. Full dataset for normalization denominators.
 #' @param group.by Color by this meta column.
@@ -18,21 +19,21 @@
 #' skins <- c("Control", "Lesional")
 #' celltypes <- c("MEL","KC_act")
 #' celltypeColName <- "subCellType.ificc"
-#' 
+#'
 #' object <- srt[,srt$Skin %in% skins &
 #'                 srt$DiseaseFiner %in% diseases]
-#' 
+#'
 #' ind <- object@meta.data[,celltypeColName] %in% celltypes
 #' PiePlot.ssc(srt, group.by="DiseaseFiner", split.by="subCellType.ificc", normalize.by=c("DiseaseFiner"), ind.cell=ind,
 #' width=0.9, title=NULL, label=T, color=NULL)
-#' @import ggplot2 tidyverse circlize
+#' @import ggplot2 magrittr tibble dplyr tidyr circlize
 #' @export
 
 
 PiePlot.ssc <- function(object, group.by, split.by=NULL, layer.by=NULL, normalize.by=NULL, ind.cell=NULL,
                         width=0.9, title=NULL, number_labels="percentage", label.digit=4, plot.theme="void", color=NULL){
   tb <- object@meta.data[, c(group.by, split.by, layer.by), drop = F]
-  
+
   if (!is.null(ind.cell)){
     tb$plot <- "n"
     tb$plot[ind.cell] <- "y"
@@ -55,20 +56,20 @@ PiePlot.ssc <- function(object, group.by, split.by=NULL, layer.by=NULL, normaliz
       summarise(count = n(), denominator = unique(denominator), display = unique(plot), splitby=unique(splitby)) %>%
       group_by(denominator)
   }
-  
+
   mt <- mt %>%
     mutate(prop = round(count/sum(count), digits = label.digit)) %>%
-    replace(is.na(.),0) %>% 
-    group_by(splitby) %>% 
-    mutate(prop = prop/sum(prop)) %>% 
+    replace(is.na(.),0) %>%
+    group_by(splitby) %>%
+    mutate(prop = prop/sum(prop)) %>%
     separate(numerator, into = c("groupby","splitby","layerby"), sep = ":", fill = "right") %>%
     filter(display == "y")
   if (is.factor(object@meta.data[,group.by])) mt$groupby <- factor(mt$groupby, levels = levels(object@meta.data[,group.by]))
   if (is.factor(object@meta.data[,split.by])) mt$splitby <- factor(mt$splitby, levels = levels(object@meta.data[,split.by]))
   if (is.factor(object@meta.data[,layer.by])) mt$layerby <- factor(mt$layerby, levels = levels(object@meta.data[,layer.by]))
-  
+
   bp<- ggplot(mt, aes(x=layerby,y=prop,fill=groupby)) +
-    geom_bar(width = width, stat = "identity", position = "fill") + 
+    geom_bar(width = width, stat = "identity", position = "fill") +
     labs(fill=group.by)
   pie <- bp + coord_polar("y", start=0) +
     theme(axis.text.x=element_blank(),

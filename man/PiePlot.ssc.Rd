@@ -2,7 +2,7 @@
 % Please edit documentation in R/PiePlot.ssc.R
 \name{PiePlot.ssc}
 \alias{PiePlot.ssc}
-\title{percent plot with denominator and devider specified.}
+\title{percent plot with denominator and divider specified.}
 \usage{
 PiePlot.ssc(
   object,
@@ -43,7 +43,7 @@ PiePlot.ssc(
 \item{plot.theme}{ggplot theme. void by default. NULL to skip.}
 }
 \description{
-
+This function uses a pie plot to show the percentage of each group in the total. The denominator and divider can be specified to normalize the percentage.
 }
 \examples{
 diseases <- c("HealthyControl", "Dermatomyositis", "Lupus", "Psoriasis", "Vitiligo-active")

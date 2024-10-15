@@ -10,7 +10,7 @@
 #' FeaturePlot.meta(srt, "FOXP3")
 #' @importFrom cowplot theme_cowplot
 #' @importFrom patchwork wrap_plots
-#' @importFrom Seurat AutoPointSize SetQuantile UpdateSlots DefaultDimReduc SingleDimPlot
+#' @importFrom Seurat AutoPointSize SetQuantile SingleDimPlot
 #' @import ggplot2
 #' @export
 
@@ -716,80 +716,80 @@ FeaturePlot.meta <- function(
 #
 #
 #
-# DefaultDimReduc <- function(object, assay = NULL) {
-#   object <- UpdateSlots(object = object)
-#   assay <- assay %||% DefaultAssay(object = object)
-#   drs.use <- c('umap', 'tsne', 'pca')
-#   dim.reducs <- FilterObjects(object = object, classes.keep = 'DimReduc')
-#   drs.assay <- Filter(
-#     f = function(x) {
-#       return(DefaultAssay(object = object[[x]]) == assay)
-#     },
-#     x = dim.reducs
-#   )
-#   if (length(x = drs.assay) > 0) {
-#     index <- lapply(
-#       X = drs.use,
-#       FUN = grep,
-#       x = drs.assay,
-#       ignore.case = TRUE
-#     )
-#     index <- Filter(f = length, x = index)
-#     if (length(x = index) > 0) {
-#       return(drs.assay[min(index[[1]])])
-#     }
-#   }
-#   index <- lapply(
-#     X = drs.use,
-#     FUN = grep,
-#     x = dim.reducs,
-#     ignore.case = TRUE
-#   )
-#   index <- Filter(f = length, x = index)
-#   if (length(x = index) < 1) {
-#     stop(
-#       "Unable to find a DimReduc matching one of '",
-#       paste(drs.use[1:(length(x = drs.use) - 1)], collapse = "', '"),
-#       "', or '",
-#       drs.use[length(x = drs.use)],
-#       "', please specify a dimensional reduction to use",
-#       call. = FALSE
-#     )
-#   }
-#   return(dim.reducs[min(index[[1]])])
-# }
-#
-#
-#
-#
-# UpdateSlots <- function(object) {
-#   object.list <- sapply(
-#     X = slotNames(x = object),
-#     FUN = function(x) {
-#       return(tryCatch(
-#         expr = slot(object = object, name = x),
-#         error = function(...) {
-#           return(NULL)
-#         }
-#       ))
-#     },
-#     simplify = FALSE,
-#     USE.NAMES = TRUE
-#   )
-#   object.list <- Filter(f = Negate(f = is.null), x = object.list)
-#   object.list <- c('Class' = class(x = object)[1], object.list)
-#   object <- do.call(what = 'new', args = object.list)
-#   for (x in setdiff(x = slotNames(x = object), y = names(x = object.list))) {
-#     xobj <- slot(object = object, name = x)
-#     if (is.vector(x = xobj) && !is.list(x = xobj) && length(x = xobj) == 0) {
-#       slot(object = object, name = x) <- vector(
-#         mode = class(x = xobj),
-#         length = 1L
-#       )
-#     }
-#   }
-#   return(object)
-# }
+DefaultDimReduc <- function(object, assay = NULL) {
+  object <- UpdateSlots(object = object)
+  assay <- assay %||% DefaultAssay(object = object)
+  drs.use <- c('umap', 'tsne', 'pca')
+  dim.reducs <- FilterObjects(object = object, classes.keep = 'DimReduc')
+  drs.assay <- Filter(
+    f = function(x) {
+      return(DefaultAssay(object = object[[x]]) == assay)
+    },
+    x = dim.reducs
+  )
+  if (length(x = drs.assay) > 0) {
+    index <- lapply(
+      X = drs.use,
+      FUN = grep,
+      x = drs.assay,
+      ignore.case = TRUE
+    )
+    index <- Filter(f = length, x = index)
+    if (length(x = index) > 0) {
+      return(drs.assay[min(index[[1]])])
+    }
+  }
+  index <- lapply(
+    X = drs.use,
+    FUN = grep,
+    x = dim.reducs,
+    ignore.case = TRUE
+  )
+  index <- Filter(f = length, x = index)
+  if (length(x = index) < 1) {
+    stop(
+      "Unable to find a DimReduc matching one of '",
+      paste(drs.use[1:(length(x = drs.use) - 1)], collapse = "', '"),
+      "', or '",
+      drs.use[length(x = drs.use)],
+      "', please specify a dimensional reduction to use",
+      call. = FALSE
+    )
+  }
+  return(dim.reducs[min(index[[1]])])
+}
+
+
+
+
+UpdateSlots <- function(object) {
+  object.list <- sapply(
+    X = slotNames(x = object),
+    FUN = function(x) {
+      return(tryCatch(
+        expr = slot(object = object, name = x),
+        error = function(...) {
+          return(NULL)
+        }
+      ))
+    },
+    simplify = FALSE,
+    USE.NAMES = TRUE
+  )
+  object.list <- Filter(f = Negate(f = is.null), x = object.list)
+  object.list <- c('Class' = class(x = object)[1], object.list)
+  object <- do.call(what = 'new', args = object.list)
+  for (x in setdiff(x = slotNames(x = object), y = names(x = object.list))) {
+    xobj <- slot(object = object, name = x)
+    if (is.vector(x = xobj) && !is.list(x = xobj) && length(x = xobj) == 0) {
+      slot(object = object, name = x) <- vector(
+        mode = class(x = xobj),
+        length = 1L
+      )
+    }
+  }
+  return(object)
+}
 #
 #
 # SetQuantile <- function(cutoff, data) {

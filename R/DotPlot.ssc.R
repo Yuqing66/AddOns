@@ -9,7 +9,7 @@
 #' @details Use mean of normalized UMI of cells in a condition instead of aggregated bulk to simplify calculation.
 #'
 #' @param input Seurat object.
-#' @param gene
+#' @param gene Gene name.
 #' @param group.by Group and color by this meta column
 #' @param split.by Split into different panels. A vector with one or two elements, in order of c(row, col)
 #' @param point.by "Patient" by default.

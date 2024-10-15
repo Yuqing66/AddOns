@@ -28,6 +28,8 @@ DotPlot.ssc(
 \arguments{
 \item{input}{Seurat object.}
 
+\item{gene}{Gene name.}
+
 \item{group.by}{Group and color by this meta column}
 
 \item{split.by}{Split into different panels. A vector with one or two elements, in order of c(row, col)}

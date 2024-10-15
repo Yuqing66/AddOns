@@ -2,7 +2,7 @@
 % Please edit documentation in R/PercentPlot.R
 \name{PercentPlot.single}
 \alias{PercentPlot.single}
-\title{percent plot with denominator and devider specified.}
+\title{percent plot with denominator and divider specified.}
 \usage{
 PercentPlot.single(
   object,
@@ -82,7 +82,7 @@ the horizontal location of jitter plot. Can set a lower value for jitter.width t
 \item{number_labels}{Show stats at the bottom of the plot if TRUE. Total cell number in that condition.}
 }
 \description{
-
+This function will plot a dotplot with each dot representing the percentage of one type of cells in another type of cells.
 }
 \examples{
 PercentPlot.single(srt, numerator="CD8_RDH10", numerator.column="subCellType.ificc", denominator="CD8", denominator.column="subCellType.ificc.main", group.by = "Skin", split.by = "DiseaseFiner", ttest=F, link = T, num.cutoff.rm=T)

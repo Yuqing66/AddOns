@@ -1,7 +1,7 @@
 #' Heatmap with single cell level or mean expression value.
 #'
-#' @description 
-#'
+#' @description
+#' Plot a heatmap with single cell level or mean expression value to show the expression level of genes in the list.
 #' @param object Seurat object.
 #' @param genes A vector of genes for heatmap.
 #' @param group.by Metadata column to aggregate for mean expression value. Null for single-cell.
@@ -34,15 +34,15 @@ HeatmapPlot.ssc <- function(object, genes, group.by=NULL, split.by=NULL, color=N
     tmp <- apply(df[,ind], 1, mean)
     return(tmp)
   })
-  
+
   #### scale data ####
   if (dataScale == 'row'){
     df2 <- t(scale(t(df2)))
   }else if (dataScale == 'column'){
     df2 <- scale(df2)
   }
-  
-  
+
+
   #### split columns ####
   if (!is.null(split.by)){
     tmp <- unlist(strsplit(colnames(df2), ":"))
@@ -56,14 +56,14 @@ HeatmapPlot.ssc <- function(object, genes, group.by=NULL, split.by=NULL, color=N
     groupbys <- colnames(df2)
     column_split_str <- NULL
   }
-  
+
   #### show column group color annotation ####
   if (annTopShow){
     topAnn <- HeatmapAnnotation(group=groupbys, which = 'column')
   }else{
     topAnn <- NULL
   }
-  
+
   #### add gene annotation on the right ####
   if (!is.null(annRightDf)){
     rightAnn <- HeatmapAnnotation(df = annRightDf,
@@ -79,7 +79,7 @@ HeatmapPlot.ssc <- function(object, genes, group.by=NULL, split.by=NULL, color=N
   #### plot heatmap ####
   hmap <- Heatmap(
     df2,
-    col = color, 
+    col = color,
     # column_title = paste0("kmeans k = ",heatmap.k),
     name = "Expression",
     show_row_names = showRowName,
@@ -96,6 +96,6 @@ HeatmapPlot.ssc <- function(object, genes, group.by=NULL, split.by=NULL, color=N
     top_annotation = topAnn,
     column_split = column_split_str,
     row_split = row_split_str)
-  
+
   return(hmap)
 }

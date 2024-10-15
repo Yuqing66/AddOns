@@ -1,6 +1,7 @@
-#' percent plot with denominator and devider specified.
+#' percent plot with denominator and divider specified.
 #'
 #' @description
+#' This function will plot a dotplot with each dot representing the percentage of one type of cells in another type of cells.
 #'
 #' @param object Seurat object.
 #' @param numerator One type to calculate percentage for, e.g. CD4

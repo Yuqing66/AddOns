@@ -11,8 +11,12 @@ FeaturePlot.meta(
   to.ToMeta = "mergedname",
   dims = c(1, 2),
   cells = NULL,
-  cols = if (blend) {     c("lightgrey", "#ff0000", "#00ff00") } else {    
-    c("lightgrey", "blue") },
+  cols = if (blend) {
+     c("lightgrey", "#ff0000", "#00ff00")
+ } else {
+    
+    c("lightgrey", "blue")
+ },
   pt.size = NULL,
   order = FALSE,
   min.cutoff = NA,

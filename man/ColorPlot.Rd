@@ -14,3 +14,13 @@ ColorPlot(colors.vec, n.col, n.row, label = NULL)
 \description{
 To make picking RGB color set easier, this function display multiple colors in a matrix. Custom labels
 }
+\examples{
+colors.custom <- c("#354C31", "#354C45", "#313E4C",
+                   "#342F4B", "#414749", "#3E6C72")
+ColorPlot(colors.custom, n.col = 3, n.row = 2)
+colors.celltype <- as.data.frame(matrix(data = c("KC","#3F837A",
+                                                 "TC","#A55F6F",
+                                                 "IC","#8659AC",
+                                                 "MEL","#3E6D95"), ncol = 2, byrow = T))
+ColorPlot(colors.celltype$V2, n.col = 2, n.row = 2, label = colors.celltype$V1)
+}

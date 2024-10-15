@@ -43,7 +43,7 @@ HeatmapPlot.ssc(
 \item{title}{Plot title.}
 }
 \description{
-
+Plot a heatmap with single cell level or mean expression value to show the expression level of genes in the list.
 }
 \examples{
 HeatmapPlot.ssc(srt.ic, genes = c("CLEC9A","XCR1","IFI35","CLEC10A"), group.by = "DiseaseFiner")
